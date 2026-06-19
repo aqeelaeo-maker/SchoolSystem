@@ -13,11 +13,46 @@ export default function Dashboard() {
   const [activities, setActivities] = useState<any[]>([]);
 
   useEffect(() => {
-    // Fetch dashboard data sequentially for simplicity, in a real app use Promise.all
-    fetch('/api/dashboard/stats').then(res => res.json()).then(setStats);
-    fetch('/api/dashboard/revenue-chart').then(res => res.json()).then(setRevenueData);
-    fetch('/api/dashboard/attendance-chart').then(res => res.json()).then(setAttendanceData);
-    fetch('/api/dashboard/activities').then(res => res.json()).then(setActivities);
+    // Determine mock data directly so it works on static hosts like Vercel
+    const mockStats = {
+      totalStudents: 12450,
+      totalTeachers: 450,
+      attendanceRate: 94.5,
+      revenue: 1250000,
+    };
+
+    const mockRevenueData = [
+      { name: 'Jan', revenue: 400000, expenses: 240000 },
+      { name: 'Feb', revenue: 300000, expenses: 139800 },
+      { name: 'Mar', revenue: 500000, expenses: 400000 },
+      { name: 'Apr', revenue: 478000, expenses: 390800 },
+      { name: 'May', revenue: 589000, expenses: 480000 },
+      { name: 'Jun', revenue: 439000, expenses: 380000 },
+      { name: 'Jul', revenue: 649000, expenses: 430000 },
+    ];
+
+    const mockAttendanceData = [
+      { day: 'Mon', rate: 95 },
+      { day: 'Tue', rate: 94 },
+      { day: 'Wed', rate: 96 },
+      { day: 'Thu', rate: 92 },
+      { day: 'Fri', rate: 90 },
+    ];
+
+    const mockActivities = [
+      { id: 1, text: "Term 1 Syllabus Updated", time: "2 hours ago", type: "academic" },
+      { id: 2, text: "New Admission in Grade 10-A", time: "5 hours ago", type: "admission" },
+      { id: 3, text: "Library Book Restock Completed", time: "1 day ago", type: "inventory" },
+      { id: 4, text: "Staff Meeting Scheduled for Friday", time: "2 days ago", type: "admin" },
+    ];
+
+    // Simulate small network delay for loading state
+    setTimeout(() => {
+      setStats(mockStats);
+      setRevenueData(mockRevenueData);
+      setAttendanceData(mockAttendanceData);
+      setActivities(mockActivities);
+    }, 500);
   }, []);
 
   if (!stats) return <div className="h-full flex items-center justify-center text-slate-500 font-mono">LOADING_KERNEL...</div>;
