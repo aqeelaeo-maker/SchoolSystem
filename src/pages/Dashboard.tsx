@@ -3,65 +3,119 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Users, BookOpen, Clock, Activity, TrendingUp } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 const cn = (...inputs: (string | undefined | null | false)[]) => twMerge(clsx(inputs));
 
 export default function Dashboard() {
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<any>({
+    totalStudents: 0,
+    totalTeachers: 0,
+    attendanceRate: 94.5, // Mocked until attendance module is built
+    revenue: 0,
+  });
+  const [loading, setLoading] = useState(true);
   const [revenueData, setRevenueData] = useState<any[]>([]);
-  const [attendanceData, setAttendanceData] = useState<any[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
 
   useEffect(() => {
-    // Determine mock data directly so it works on static hosts like Vercel
-    const mockStats = {
-      totalStudents: 12450,
-      totalTeachers: 450,
-      attendanceRate: 94.5,
-      revenue: 1250000,
+    let totals = { students: 0, teachers: 0, revenue: 0 };
+    let hasLoaded = { students: false, teachers: false, finance: false };
+
+    const checkLoaded = () => {
+      if (hasLoaded.students && hasLoaded.teachers && hasLoaded.finance) setLoading(false);
     };
 
-    const mockRevenueData = [
-      { name: 'Jan', revenue: 400000, expenses: 240000 },
-      { name: 'Feb', revenue: 300000, expenses: 139800 },
-      { name: 'Mar', revenue: 500000, expenses: 400000 },
-      { name: 'Apr', revenue: 478000, expenses: 390800 },
-      { name: 'May', revenue: 589000, expenses: 480000 },
-      { name: 'Jun', revenue: 439000, expenses: 380000 },
-      { name: 'Jul', revenue: 649000, expenses: 430000 },
-    ];
+    const unsubStudents = onSnapshot(collection(db, 'students'), (snapshot) => {
+      totals.students = snapshot.size;
+      hasLoaded.students = true;
+      setStats(prev => ({ ...prev, totalStudents: totals.students }));
+      checkLoaded();
+    });
 
-    const mockAttendanceData = [
-      { day: 'Mon', rate: 95 },
-      { day: 'Tue', rate: 94 },
-      { day: 'Wed', rate: 96 },
-      { day: 'Thu', rate: 92 },
-      { day: 'Fri', rate: 90 },
-    ];
+    const unsubTeachers = onSnapshot(collection(db, 'teachers'), (snapshot) => {
+      totals.teachers = snapshot.size;
+      hasLoaded.teachers = true;
+      setStats(prev => ({ ...prev, totalTeachers: totals.teachers }));
+      checkLoaded();
+    });
 
-    const mockActivities = [
-      { id: 1, text: "Term 1 Syllabus Updated", time: "2 hours ago", type: "academic" },
-      { id: 2, text: "New Admission in Grade 10-A", time: "5 hours ago", type: "admission" },
-      { id: 3, text: "Library Book Restock Completed", time: "1 day ago", type: "inventory" },
-      { id: 4, text: "Staff Meeting Scheduled for Friday", time: "2 days ago", type: "admin" },
-    ];
+    const unsubFinance = onSnapshot(collection(db, 'finance_records'), (snapshot) => {
+      let currentRevenue = 0;
+      let monthlyData: Record<string, { revenue: number, expenses: number }> = {};
+      
+      snapshot.docs.forEach(doc => {
+        const data = doc.data();
+        if (data.type === 'Income') currentRevenue += Number(data.amount || 0);
+        
+        // Group by month for chart
+        const date = data.date ? new Date(data.date) : (data.createdAt?.toDate ? data.createdAt.toDate() : new Date());
+        const monthName = date.toLocaleString('default', { month: 'short' });
+        
+        if (!monthlyData[monthName]) monthlyData[monthName] = { revenue: 0, expenses: 0 };
+        
+        if (data.type === 'Income') monthlyData[monthName].revenue += Number(data.amount || 0);
+        else monthlyData[monthName].expenses += Number(data.amount || 0);
+      });
 
-    // Simulate small network delay for loading state
-    setTimeout(() => {
-      setStats(mockStats);
-      setRevenueData(mockRevenueData);
-      setAttendanceData(mockAttendanceData);
-      setActivities(mockActivities);
-    }, 500);
+      // Convert to array for Recharts
+      const monthsOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const chartData = Object.keys(monthlyData)
+        .sort((a, b) => monthsOrder.indexOf(a) - monthsOrder.indexOf(b))
+        .map(month => ({ name: month, ...monthlyData[month] }));
+
+      // If empty, provide some default shape
+      if (chartData.length === 0) {
+        setRevenueData([{ name: 'No Data', revenue: 0, expenses: 0 }]);
+      } else {
+        setRevenueData(chartData);
+      }
+
+      totals.revenue = currentRevenue;
+      hasLoaded.finance = true;
+      setStats(prev => ({ ...prev, revenue: totals.revenue }));
+      checkLoaded();
+    });
+    
+    // Mix of latest users and finance for activities
+    const unsubActivities = onSnapshot(query(collection(db, 'finance_records'), orderBy('createdAt', 'desc'), limit(4)), (snapshot) => {
+       const mapped = snapshot.docs.map(d => {
+         const data = d.data();
+         return {
+           id: d.id,
+           text: `Transaction: ${data.title} (${data.type})`,
+           time: data.date ? new Date(data.date).toLocaleDateString() : 'Recent',
+           type: 'admin'
+         }
+       });
+       setActivities(mapped);
+    });
+
+    return () => {
+      unsubStudents();
+      unsubTeachers();
+      unsubFinance();
+      unsubActivities();
+    };
   }, []);
 
-  if (!stats) return <div className="h-full flex items-center justify-center text-slate-500 font-mono">LOADING_KERNEL...</div>;
+  if (loading) return <div className="h-full flex items-center justify-center text-slate-500 font-mono">FETCHING_REALTIME_DATA...</div>;
 
   const statCards = [
     { title: 'Total Students', value: stats.totalStudents.toLocaleString(), icon: Users, color: 'text-blue-400', bg: 'bg-blue-400/10' },
     { title: 'Total Teachers', value: stats.totalTeachers.toLocaleString(), icon: BookOpen, color: 'text-purple-400', bg: 'bg-purple-400/10' },
     { title: 'Attendance Rate', value: `${stats.attendanceRate}%`, icon: Clock, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-    { title: 'Revenue (MTD)', value: `$${(stats.revenue/1000).toFixed(1)}k`, icon: TrendingUp, color: 'text-amber-400', bg: 'bg-amber-400/10' },
+    { title: 'Total Revenue', value: `$${(stats.revenue/1000).toFixed(1)}k`, icon: TrendingUp, color: 'text-amber-400', bg: 'bg-amber-400/10' },
+  ];
+
+  // Dummy attendance data since attendance isn't fully built
+  const attendanceData = [
+    { day: 'Mon', rate: 95 },
+    { day: 'Tue', rate: 94 },
+    { day: 'Wed', rate: 96 },
+    { day: 'Thu', rate: 92 },
+    { day: 'Fri', rate: 90 },
   ];
 
   return (

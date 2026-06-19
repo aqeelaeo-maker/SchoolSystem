@@ -10,7 +10,8 @@ import {
   Home, 
   Settings,
   LogOut,
-  Shield
+  Shield,
+  FileSpreadsheet
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -22,6 +23,7 @@ const navItems = [
   { path: '/students', label: 'Students', icon: GraduationCap },
   { path: '/teachers', label: 'Teachers', icon: Users },
   { path: '/academics', label: 'Academics', icon: BookOpen },
+  { path: '/results', label: 'Term Results', icon: FileSpreadsheet },
   { path: '/finance', label: 'Finance', icon: Wallet },
   { path: '/transport', label: 'Transport', icon: Bus },
   { path: '/hostel', label: 'Hostel', icon: Home },

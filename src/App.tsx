@@ -11,6 +11,7 @@ import Teachers from './pages/Teachers';
 import Academics from './pages/Academics';
 import Finance from './pages/Finance';
 import Users from './pages/Users';
+import Results from './pages/Results';
 import PlaceholderPage from './pages/PlaceholderPage';
 
 export default function App() {
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/students" element={<Students />} />
           <Route path="/teachers" element={<Teachers />} />
           <Route path="/academics" element={<Academics />} />
+          <Route path="/results" element={<Results />} />
           <Route path="/finance" element={<Finance />} />
           <Route path="/users" element={<Users />} />
           <Route path="/transport" element={<PlaceholderPage title="Transport Management" />} />
