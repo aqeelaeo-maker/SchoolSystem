@@ -3,6 +3,7 @@ import { Search, Plus, MoreVertical, Edit2, Trash2 } from 'lucide-react';
 import { useToast } from '../contexts/ToastContext';
 import { collection, onSnapshot, addDoc, serverTimestamp, query, orderBy } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import StudentFormModal from '../components/StudentFormModal';
 
 export default function Students() {
   const [students, setStudents] = useState<any[]>([]);
@@ -32,24 +33,7 @@ export default function Students() {
     }
   }, [showToast]);
 
-  const handleAddMockStudent = async () => {
-    try {
-      showToast('Adding new student to Firebase...', 'info');
-      const mockNames = ['Sarah Connor', 'John Doe', 'Jane Smith', 'Alice Wonderland', 'Bob Builder'];
-      await addDoc(collection(db, 'students'), {
-        name: mockNames[Math.floor(Math.random() * mockNames.length)],
-        grade: '10th',
-        section: 'A',
-        status: 'Active',
-        attendance: '100%',
-        createdAt: serverTimestamp()
-      });
-      showToast('Student added successfully!', 'success');
-    } catch (error) {
-      console.error(error);
-      showToast('Failed to add student. Check Firebase rules.', 'error');
-    }
-  };
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -59,13 +43,15 @@ export default function Students() {
           <p className="text-slate-400 text-sm mt-1">Manage admissions, view profiles, and track status.</p>
         </div>
         <button 
-          onClick={handleAddMockStudent}
+          onClick={() => setIsFormOpen(true)}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-medium flex items-center transition-colors shadow-lg shadow-blue-500/20"
         >
           <Plus className="w-4 h-4 mr-2" />
           Add Student
         </button>
       </div>
+
+      <StudentFormModal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} />
 
       <div className="glass-panel rounded-2xl overflow-hidden flex flex-col">
         {/* Table Toolbar */}
