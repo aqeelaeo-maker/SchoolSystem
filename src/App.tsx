@@ -7,6 +7,10 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import Dashboard from './pages/Dashboard';
 import Students from './pages/Students';
+import Teachers from './pages/Teachers';
+import Academics from './pages/Academics';
+import Finance from './pages/Finance';
+import Users from './pages/Users';
 import PlaceholderPage from './pages/PlaceholderPage';
 
 export default function App() {
@@ -17,9 +21,10 @@ export default function App() {
         <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/students" element={<Students />} />
-          <Route path="/teachers" element={<PlaceholderPage title="Teacher Management" />} />
-          <Route path="/academics" element={<PlaceholderPage title="Academics" />} />
-          <Route path="/finance" element={<PlaceholderPage title="Finance Module" />} />
+          <Route path="/teachers" element={<Teachers />} />
+          <Route path="/academics" element={<Academics />} />
+          <Route path="/finance" element={<Finance />} />
+          <Route path="/users" element={<Users />} />
           <Route path="/transport" element={<PlaceholderPage title="Transport Management" />} />
           <Route path="/hostel" element={<PlaceholderPage title="Hostel Management" />} />
           {/* Catch-all */}

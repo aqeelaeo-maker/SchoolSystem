@@ -9,7 +9,8 @@ import {
   Bus, 
   Home, 
   Settings,
-  LogOut
+  LogOut,
+  Shield
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -24,6 +25,7 @@ const navItems = [
   { path: '/finance', label: 'Finance', icon: Wallet },
   { path: '/transport', label: 'Transport', icon: Bus },
   { path: '/hostel', label: 'Hostel', icon: Home },
+  { path: '/users', label: 'System Users', icon: Shield },
 ];
 
 export default function Sidebar() {
