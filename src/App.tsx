@@ -12,6 +12,7 @@ import Academics from './pages/Academics';
 import Finance from './pages/Finance';
 import Users from './pages/Users';
 import Results from './pages/Results';
+import Settings from './pages/Settings';
 import PlaceholderPage from './pages/PlaceholderPage';
 
 export default function App() {
@@ -29,6 +30,7 @@ export default function App() {
           <Route path="/users" element={<Users />} />
           <Route path="/transport" element={<PlaceholderPage title="Transport Management" />} />
           <Route path="/hostel" element={<PlaceholderPage title="Hostel Management" />} />
+          <Route path="/settings" element={<Settings />} />
           {/* Catch-all */}
           <Route path="*" element={<PlaceholderPage title="Page Not Found" />} />
         </Route>

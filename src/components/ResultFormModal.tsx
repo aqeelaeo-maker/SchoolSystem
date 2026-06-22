@@ -107,7 +107,7 @@ export default function ResultFormModal({ isOpen, onClose }: ResultFormModalProp
                 {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-300 ml-1">Marks Obtained</label>
                 <input required type="number" name="marksObtained" value={formData.marksObtained} onChange={handleChange} max={formData.totalMarks} className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-500 transition-all" placeholder="85" />

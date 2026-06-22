@@ -69,7 +69,7 @@ export default function FinanceFormModal({ isOpen, onClose }: FinanceFormModalPr
               <label className="text-sm font-medium text-slate-300 ml-1">Amount ($)</label>
               <input required type="number" name="amount" value={formData.amount} onChange={handleChange} className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500 transition-all" placeholder="5000" />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-300 ml-1">Type</label>
                 <select name="type" value={formData.type} onChange={handleChange} className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500 transition-all">

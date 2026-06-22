@@ -51,8 +51,8 @@ export default function TeacherFormModal({ isOpen, onClose }: TeacherFormModalPr
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="glass-panel w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col border border-slate-700/50">
-        <div className="flex items-center justify-between p-6 border-b border-slate-700/50">
+      <div className="glass-panel w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col border border-slate-700/50 max-h-[90dvh]">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-slate-700/50 shrink-0">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-400">
               <UserPlus className="w-5 h-5" />
@@ -66,7 +66,7 @@ export default function TeacherFormModal({ isOpen, onClose }: TeacherFormModalPr
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="p-4 sm:p-6 overflow-y-auto custom-scrollbar">
           <form id="teacher-form" onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-300 ml-1">Full Name</label>

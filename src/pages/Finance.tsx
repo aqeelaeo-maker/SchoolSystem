@@ -70,7 +70,7 @@ export default function Finance() {
       <FinanceFormModal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} />
       <FeeVoucherModal isOpen={isVoucherOpen} onClose={() => setIsVoucherOpen(false)} />
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="glass-panel p-6 rounded-2xl flex items-center justify-between">
            <div>
              <p className="text-slate-400 text-sm">Total Income</p>

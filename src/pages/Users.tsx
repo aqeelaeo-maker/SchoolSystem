@@ -5,7 +5,7 @@ import { collection, onSnapshot, query, orderBy, deleteDoc, doc } from 'firebase
 import { db } from '../lib/firebase';
 import UserFormModal from '../components/UserFormModal';
 
-export default function Users() {
+export default function Users({ hideHeader = false }: { hideHeader?: boolean }) {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { showToast } = useToast();
@@ -42,15 +42,25 @@ export default function Users() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold font-heading text-white">System Users</h1>
-          <p className="text-slate-400 text-sm mt-1">Manage role-based access for teachers, students, and parents.</p>
+      {!hideHeader && (
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold font-heading text-white">System Users</h1>
+            <p className="text-slate-400 text-sm mt-1">Manage role-based access for teachers, students, and parents.</p>
+          </div>
+          <button onClick={() => setIsFormOpen(true)} className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl text-sm font-medium flex items-center transition-colors">
+            <Plus className="w-4 h-4 mr-2" /> Add User
+          </button>
         </div>
-        <button onClick={() => setIsFormOpen(true)} className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl text-sm font-medium flex items-center transition-colors">
-          <Plus className="w-4 h-4 mr-2" /> Add User
-        </button>
-      </div>
+      )}
+
+      {hideHeader && (
+        <div className="flex items-center justify-end">
+          <button onClick={() => setIsFormOpen(true)} className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl text-sm font-medium flex items-center transition-colors">
+            <Plus className="w-4 h-4 mr-2" /> Add User
+          </button>
+        </div>
+      )}
 
       <UserFormModal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} />
 
