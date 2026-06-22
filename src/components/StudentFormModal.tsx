@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { X, UserPlus, Loader2 } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { X, UserPlus, Loader2, UploadCloud, Image as ImageIcon } from 'lucide-react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db, storage } from '../lib/firebase';
 import { useToast } from '../contexts/ToastContext';
 
 interface StudentFormModalProps {
@@ -12,6 +13,8 @@ interface StudentFormModalProps {
 export default function StudentFormModal({ isOpen, onClose }: StudentFormModalProps) {
   const { showToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -22,6 +25,7 @@ export default function StudentFormModal({ isOpen, onClose }: StudentFormModalPr
     email: '',
     phone: '',
     address: '',
+    photoUrl: '',
   });
 
   if (!isOpen) return null;
@@ -29,6 +33,38 @@ export default function StudentFormModal({ isOpen, onClose }: StudentFormModalPr
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      showToast('Image size should be less than 2MB', 'error');
+      return;
+    }
+
+    setUploadingPhoto(true);
+    try {
+      const storageRef = ref(storage, `students/photo_${Date.now()}`);
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      setFormData(prev => ({ ...prev, photoUrl: downloadURL }));
+      showToast('Photo uploaded successfully.', 'success');
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+         setFormData(prev => ({ ...prev, photoUrl: reader.result as string }));
+         showToast('Using local image format.', 'info');
+      };
+      reader.readAsDataURL(file);
+    } finally {
+      setUploadingPhoto(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,6 +83,7 @@ export default function StudentFormModal({ isOpen, onClose }: StudentFormModalPr
         email: formData.email,
         phone: formData.phone,
         address: formData.address,
+        photoUrl: formData.photoUrl,
         status: 'Active',
         attendance: '100%',
         createdAt: serverTimestamp()
@@ -57,7 +94,7 @@ export default function StudentFormModal({ isOpen, onClose }: StudentFormModalPr
       // Reset form
       setFormData({
         firstName: '', lastName: '', gender: 'Male', dob: '', 
-        grade: '10th', section: 'A', email: '', phone: '', address: ''
+        grade: '10th', section: 'A', email: '', phone: '', address: '', photoUrl: ''
       });
     } catch (error) {
       console.error("Error adding student:", error);
@@ -68,8 +105,8 @@ export default function StudentFormModal({ isOpen, onClose }: StudentFormModalPr
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="glass-panel w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[90dvh] border border-slate-700/50">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="glass-panel w-full sm:max-w-2xl sm:rounded-2xl shadow-2xl flex flex-col h-[90dvh] sm:h-auto sm:max-h-[90dvh] border-t sm:border border-slate-700/50 rounded-t-2xl">
         
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-slate-700/50 shrink-0">
@@ -94,6 +131,40 @@ export default function StudentFormModal({ isOpen, onClose }: StudentFormModalPr
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
           <form id="student-form" onSubmit={handleSubmit} className="space-y-6">
             
+            {/* Photo Upload Section */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6 pb-6 border-b border-slate-700/50">
+              <div className="w-24 h-24 shrink-0 rounded-2xl bg-slate-800/50 flex items-center justify-center overflow-hidden border border-slate-700 p-2">
+                {formData.photoUrl ? (
+                  <img src={formData.photoUrl} alt="Student" className="w-full h-full object-cover rounded-xl" onError={(e) => (e.currentTarget.style.display = 'none')} />
+                ) : (
+                  <ImageIcon className="w-10 h-10 text-slate-500" />
+                )}
+              </div>
+              
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-slate-200 mb-1">Student Photograph</h3>
+                <p className="text-xs text-slate-400 mb-3">Upload a clear, recent photograph. Ensure the face is visible.</p>
+                <input 
+                  type="file" 
+                  ref={fileInputRef}
+                  onChange={handlePhotoUpload}
+                  accept="image/*"
+                  className="hidden" 
+                  id="student-photo-upload"
+                />
+                <label 
+                  htmlFor="student-photo-upload"
+                  className={`inline-flex items-center justify-center px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl text-sm font-medium transition-colors cursor-pointer ${uploadingPhoto ? 'opacity-50 pointer-events-none' : ''}`}
+                >
+                  {uploadingPhoto ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Uploading...</>
+                  ) : (
+                    <><UploadCloud className="w-4 h-4 mr-2 text-blue-400" /> Browse Photo</>
+                  )}
+                </label>
+              </div>
+            </div>
+
             {/* Personal Details Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">

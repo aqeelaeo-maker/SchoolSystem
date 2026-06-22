@@ -50,8 +50,8 @@ export default function TeacherFormModal({ isOpen, onClose }: TeacherFormModalPr
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="glass-panel w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col border border-slate-700/50 max-h-[90dvh]">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="glass-panel w-full sm:max-w-2xl sm:rounded-2xl shadow-2xl flex flex-col h-[90dvh] sm:h-auto sm:max-h-[90dvh] border-t sm:border border-slate-700/50 rounded-t-2xl">
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-slate-700/50 shrink-0">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-400">
